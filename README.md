@@ -1,8 +1,8 @@
 # Image Generative Model
 7015 Group Project
 
-# Demo
-Run train_gans.py
+# Train models
+Run [train_model](./train_GAN.py)
 
 # Implementation
 Basic algorithms/models: VAE, GANs, DDPM
