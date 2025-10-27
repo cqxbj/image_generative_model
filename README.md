@@ -23,4 +23,6 @@ EMNIST_Data_Preprocess.
 
 # l2
 Conditional_GAN development.
+
+# Samples
 <img width="1773" height="1062" alt="image" src="https://github.com/user-attachments/assets/793bb0df-d55a-4aa3-8803-82a3a3551626" />
