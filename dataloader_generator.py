@@ -18,6 +18,9 @@ def generate_MNIST_dataloader():
         shuffle=True
     )
 
+def generate():
+    pass
+
 def generate_CIFAR_10_dataloader():
     transform = transforms.Compose([
         transforms.ToTensor()]
