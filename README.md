@@ -7,6 +7,7 @@ Run [train_model](./train_GAN.py)
 # Implementation
 Basic algorithms/models: VAE, GANs, DDPM
 
+
 # Priority 1
 Dataset: MNIST, EMNIST
 We develop a handwriting generation model using three different approaches (VAE, GANs, DDPM) and compare their performance.
@@ -22,3 +23,6 @@ EMNIST_Data_Preprocess.
 
 # l2
 Conditional_GAN development.
+
+# Examples
+<img width="1773" height="1062" alt="image" src="https://github.com/user-attachments/assets/793bb0df-d55a-4aa3-8803-82a3a3551626" />
