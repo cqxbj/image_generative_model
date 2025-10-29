@@ -3,6 +3,7 @@ import torch.nn.functional as F
 import dataloader_generator as dg
 import torch
 import torch.optim as optim
+from model_GANs.hand_written import Conv_GANs_Discriminator as HandW_Discriminator, Conv_GANS_Generator as HandW_Generator 
 from model_GANs.cifar import Conv_GANs_Discriminator as Cifar_Discriminator, Conv_GANS_Generator as Cifar_Generator 
 from model_GANs.mnist import Conv_GANs_Discriminator as Mnist_Discriminator, Conv_GANS_Generator as Mnist_Generator
 import torchvision.utils as utils
@@ -18,7 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 '''
 # input here.  
 #  1. CIFAR  2.MNIST  3.EMNIST
-m = "MNIST" 
+m = "HandW" 
 parameters_load_path ="trained_parameters/" 
 # ----------------------------------------------------------------------------------------------------------------------------------------------
 ### step - 1 create model and load parameters if exists
@@ -37,6 +38,11 @@ elif m == "EMNIST":
     data_loader = dg.generate_EMNIST_dataloader()
     generator = Mnist_Generator(z_dim).to(device)
     discriminator = Mnist_Discriminator().to(device)
+elif m == "HandW":
+    z_dim = 128
+    data_loader = dg.generate_Handwritten_dataloader()
+    generator = HandW_Generator(z_dim).to(device)
+    discriminator = HandW_Discriminator().to(device)
 else:
     print("让你随便写,随便写就没东西给你了")
     print("byebye")
@@ -51,14 +57,15 @@ except:
 
 ### step - 2 training — config hyper_parameters
 epoches = 150
-lr = 0.0001
-t = 2
-discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
-generator_optimizer = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
+lr_d = 0.0002
+lr_g = 0.0004
+t = 8
+discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=lr_d, betas=(0.5, 0.999))
+generator_optimizer = optim.Adam(generator.parameters(), lr=lr_g, betas=(0.5, 0.999))
 
 freq_gen_sample = 1
 freq_save_model = 20
-n_sample = 8
+n_sample = 64
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------
 ### step -3 GANs training_function implementation.
@@ -122,7 +129,7 @@ def train_gans():
                 images = generator(noises)
                 images = images.to("cpu")
 
-            grid_image = utils.make_grid(images, nrow=4, normalize=True)
+            grid_image = utils.make_grid(images, nrow=8, normalize=True)
             plt.imshow(grid_image.permute(1,2,0))
             plt.axis("off")
             plt.savefig(f"ai_images/{m}_GANs_{epoch}")
@@ -137,3 +144,15 @@ def train_gans():
 
 # starts training
 train_gans()
+
+# for i in range(10):
+#     with torch.no_grad():
+#         noises = torch.randn(n_sample, z_dim).to(device)
+#         images = generator(noises)
+#         images = images.to("cpu")
+
+#     grid_image = utils.make_grid(images, nrow=4, normalize=True)
+#     plt.imshow(grid_image.permute(1,2,0))
+#     plt.axis("off")
+#     plt.savefig(f"ai_images/{m}_GANs_test{i}")
+#     plt.close()
