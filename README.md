@@ -1,4 +1,4 @@
-<img width="640" height="480" alt="CIFAR_GANs_70" src="https://github.com/user-attachments/assets/b35b710b-97c5-4909-bae8-d67d1968a66a" /># Image Generative Model
+# Image Generative Model
 7015 Group Project
 
 # Train models
