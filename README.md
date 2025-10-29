@@ -1,4 +1,4 @@
-# Image Generative Model
+<img width="640" height="480" alt="CIFAR_GANs_70" src="https://github.com/user-attachments/assets/b35b710b-97c5-4909-bae8-d67d1968a66a" /># Image Generative Model
 7015 Group Project
 
 # Train models
@@ -25,5 +25,8 @@ EMNIST_Data_Preprocess.
 Conditional_GAN development.
 
 # Examples
-<img width="666" height="666" alt="image" src="https://github.com/user-attachments/assets/793bb0df-d55a-4aa3-8803-82a3a3551626" />
+<img width="320" height="320" alt="CIFAR_GANs_70" src="https://github.com/user-attachments/assets/343e0ac7-bb40-431d-a138-8e4cac94b418" />
+<img width="320" height="320" alt="CIFAR_GANs_65" src="https://github.com/user-attachments/assets/a534b0cd-c506-4723-9312-e6bdbd8fcb61" />
+
+
 <img width="666" height="666" alt="2c183d77293497347227bb96d61ccc29" src="https://github.com/user-attachments/assets/d9ba00c9-869c-4e49-b51c-73d7ff868e76" />
