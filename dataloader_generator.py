@@ -7,7 +7,8 @@ import torch
 
 def generate_MNIST_dataloader():
     transform = transforms.Compose([
-        transforms.ToTensor()]
+        transforms.ToTensor()
+        ]
         )
     mnist_dataset = datasets.MNIST(
             root="./data",
@@ -15,16 +16,18 @@ def generate_MNIST_dataloader():
             download=True,
             transform = transform
         )
+
     return DataLoader(
         mnist_dataset,
-        batch_size = 128,
+        batch_size = 1024,
         shuffle=True
     )
 
+
 def generate_CIFAR_10_dataloader():
     transform = transforms.Compose([
-        transforms.ToTensor()]
-        )
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     cifar_dataset = datasets.CIFAR10(
             root="./data",
             train=True,
@@ -43,7 +46,6 @@ def generate_EMNIST_dataloader():
         transforms.Lambda(lambda img:img.transpose(1,2))]
         )
     
-    # transforms.Lambda(lambda img:img.transpose(1,2))
     emnist_dataset = datasets.EMNIST(
             root="./data",
             split="byclass",
@@ -56,12 +58,68 @@ def generate_EMNIST_dataloader():
         shuffle=True
     )
 
+def generate_STL10_dataloader():
+    transform = transforms.Compose([
+        transforms.ToTensor()]
+        )
+    dataset = datasets.STL10(
+            root="./data",
+            split="train",
+            download=True,
+            folds=5,
+            transform = transform
+        )
+    return DataLoader(
+        dataset,
+        batch_size = 64,
+        shuffle=True
+    )
+
+def generate_Pets_dataloader():
+    transform = transforms.Compose([
+        transforms.Resize((128, 128)),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+
+    dataset = datasets.OxfordIIITPet(
+        root='./data',
+        download=True,
+        transform=transform
+    )
+    return DataLoader(
+        dataset, 
+        batch_size=64, 
+        shuffle=True,
+    )
+
+def generate_CelebA_dataloader():
+
+    transform = transforms.Compose([
+        transforms.CenterCrop((160, 160)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+
+    dataset = datasets.CelebA(
+        root='./data',
+        download=True,
+        transform=transform
+    )
+
+    return DataLoader(
+        dataset, 
+        batch_size= 256, 
+        shuffle=True,
+    )
+
 
 def generate_Handwritten_dataloader():
-    dataset = HandWrittenDataset() 
+    dataset = __HandWrittenDataset() 
     return DataLoader(dataset, batch_size= 64, shuffle= True)
 
-class HandWrittenDataset(Dataset):
+class __HandWrittenDataset(Dataset):
     def __init__(self, path = "./data/handwritten_data" ):
         super().__init__()
         self.np_path = path
@@ -74,8 +132,8 @@ class HandWrittenDataset(Dataset):
 
         self.all_char_list = np.concatenate(all_char_list,axis=0)
         self.labels = np.array(labels)
-        print(self.all_char_list.shape)
-        print(self.labels.shape)
+        # print(self.all_char_list.shape)
+        # print(self.labels.shape)
 
         self.transform =  transforms.Compose([
             transforms.ToTensor()])
@@ -85,7 +143,8 @@ class HandWrittenDataset(Dataset):
     def __getitem__(self,index):
         img = self.all_char_list[index]
         label = self.labels[index]
-        
         img = self.transform(img)
         label = torch.tensor(label)
         return self.all_char_list[index], self.labels[index]
+
+
