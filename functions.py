@@ -32,8 +32,8 @@ def load_ddpm_model(model_name, is_attention_on = False, is_residual_on = False,
         print("load parameters errors")
     return model, diffuser
 
-def generate_imgs(model: UNet, diffuser : Diffuser,path = "_FID_model_gen_images", n_label = 0):
-    n_samples = 100
+def generate_imgs(model: UNet, diffuser : Diffuser,path = "_FID_model_gen_images", n_label = 0, n_100 = 100):
+    n_samples = n_100
     i = 0
     labels = None
     if n_label > 0 :
