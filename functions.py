@@ -101,35 +101,21 @@ def process_data():
         np.save(save_path,character_s_np)
 
 ## generate real images . For fid_calculation
-def save_cifar10_real_images(num_images=60000):
+def save_cifar10_real_images(num_images=60000, train_data = True):
         transform = transforms.Compose([
             transforms.ToTensor(),
         ])
         dataset = torchvision.datasets.CIFAR10(
-            root='./data', train=True, download=True, transform=transform
+            root='./data', 
+            train=train_data, 
+            download=True, 
+            transform=transform
         )
         print(len(dataset))
         for i in range(min(num_images, len(dataset))):
             image, _ = dataset[i]
             image_pil = transforms.ToPILImage()(image)
             image_pil.save(os.path.join("cifar_real_images", f'{i:05d}.png'))
-
-def save_test_cifar10_real_images(num_images=60000):
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
-        dataset = torchvision.datasets.CIFAR10(
-            root='./data', train=False, download=True, transform=transform
-        )
-        print(len(dataset))
-        if not os.path.exists("cifar_test_real_images"):
-            os.makedirs("cifar_test_real_images")
-        for i in range(min(num_images, len(dataset))):
-            image, _ = dataset[i]
-            image_pil = transforms.ToPILImage()(image)
-            image_pil.save(os.path.join("cifar_test_real_images", f'{i:05d}.png'))
-
-
 
 def demo_denoise():
     pass
