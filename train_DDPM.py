@@ -21,12 +21,12 @@ dataloader = dataloader_generator.generate_CIFAR_10_dataloader()
 
 # models parameters
 parameters_load_path ="trained_parameters/" 
-modelname = "_conditional_residual_attention_DDPM"
+modelname = "_DDPM"
 T = 1000
     # set n_label = 0 to make model unconditional.
 n_label = 10
-is_attention_on = True
-is_residual_on =True
+is_attention_on = False
+is_residual_on =False
 
 model, diffuser = my_F.load_ddpm_model(modelname, 
                                        is_attention_on=is_attention_on, 
@@ -35,11 +35,11 @@ model, diffuser = my_F.load_ddpm_model(modelname,
                                        T = T)
 
 # hyper_parameters 
-epoches = 500
+epoches = 120
 lr= 0.0001
 
 # other training parameters
-epoch_startindex = 500
+epoch_startindex = 0
 fre_generate_samples = 20
 fre_save_model = 20
 
@@ -74,7 +74,7 @@ if start_training:
             optimizer.step()
             loss_sum += loss.item()
             cnt += 1 
-            print(f"{loss}")
+            # print(f"{loss}")
         if epoch > 0:
             loss = loss_sum/cnt
             loss_list.append(loss)
