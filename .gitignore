@@ -1,16 +1,8 @@
-# 忽略这些文件夹下的所有内容
-/_FID_cifar_real_images/*
-/data/*
-/_grid_images/*
+
+
+/_samples/*
 /__pycache__/*
 /plots_pdf/*
-/_FID_model_gen_images/*
-/_FID_model_gen_images_ddpm/*
+/_FID_imgs/*
 
-# 但保留文件夹本身（Git 会自动跟踪空文件夹）
-!/_FID_cifar_real_images/
-!/data/
-!/_grid_images/
-!/__pycache__/
-!/plots_pdf/
-!/_FID_model_gen_images/
+

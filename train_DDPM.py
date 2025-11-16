@@ -1,18 +1,17 @@
 import torch
-import torchvision
-import matplotlib.pyplot as plt
 import dataloader_generator
-from model_DDPM.unet import UNet
-from model_DDPM.diffuser import Diffuser
 import torch.optim 
 import torch.nn.functional as F
-import torchvision.utils as utils
 import functions as my_F
 import numpy as np
 import time
 
 
+''' 
 
+    this .py is implemented for training DDPM_based models.
+
+'''
 
 ## train DDPM for cifar_10
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -21,26 +20,26 @@ dataloader = dataloader_generator.generate_CIFAR_10_dataloader()
 
 # models parameters
 parameters_load_path ="trained_parameters/" 
-modelname = "_DDPM"
+modelname = "_conditional_residual_attention_DDPM"
 T = 1000
     # set n_label = 0 to make model unconditional.
 n_label = 10
-is_attention_on = False
-is_residual_on =False
+is_attention_on = True
+is_residual_on =True
 
 model, diffuser = my_F.load_ddpm_model(modelname, 
                                        is_attention_on=is_attention_on, 
                                        is_residual_on=is_residual_on, 
-                                       n_label=n_label, 
+                                       n_class=n_label, 
                                        T = T)
 
 # hyper_parameters 
-epoches = 120
+epoches = 500
 lr= 0.0001
 
 # other training parameters
 epoch_startindex = 0
-fre_generate_samples = 20
+fre_generate_samples = 10
 fre_save_model = 20
 
 
@@ -50,10 +49,6 @@ start_training = True
 if start_training:
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
     loss_list = []
-    len_dataloader = len(dataloader)
-    print(f"len_dataloader: {len_dataloader}")
-    num_param =  sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"num param:{num_param}")
     for epoch in range(epoches):
         loss_sum = 0
         cnt = 0
@@ -82,7 +77,7 @@ if start_training:
             print(f"epoch {epoch} with loss: {loss},  time: {end_time - start_time:.2f}")
             if epoch % fre_generate_samples == 0 :
                 my_F.plot_values(loss_list, model_name=modelname, start_index=epoch_startindex)
-                my_F.generate_gird_imgs(model, diffuser, n_label= n_label, modelname = modelname, epoch_index=epoch)
+                my_F.ddpm_save_samples(model, diffuser, n_class= n_label, modelname = modelname, epoch_index=epoch)
             if epoch % fre_save_model == 0 :
                 torch.save(model.state_dict(),parameters_load_path + modelname + ".pth")
     my_F.plot_values(loss_list, model_name=modelname, start_index=epoch_startindex)

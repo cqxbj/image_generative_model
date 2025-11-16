@@ -74,14 +74,16 @@ class ConvBlock(nn.Module):
         return out
 
 class UNet(nn.Module):
-    def __init__(self, in_channel = 3, time_dim = 256, n_label = 0, attention = False, residual_on = False):
+    def __init__(self, in_channel = 3, time_dim = 256, n_class = 0, attention = False, residual_on = False):
         super().__init__()
+        
         self.time_dim = time_dim
         self.attention = attention
         self.residual_on = residual_on
+        self.n_class = n_class
 
-        if n_label > 0:
-            self.label_embeding = nn.Embedding(n_label, time_dim)
+        if self.n_class > 0:
+            self.label_embeding = nn.Embedding(self.n_class,  self.time_dim)
 
         if self.attention:
             # self.attention_down_1 = SelfAttention(64)
