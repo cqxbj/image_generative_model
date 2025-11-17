@@ -23,11 +23,13 @@ class VAE(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),     #  -> 8*8
 
-            nn.Flatten(),     # 8*8
+            nn.Flatten(),    
         )
         self.encoder_mu = nn.Linear(64 * 8 * 8, z_dim)
         self.encoder_log_var = nn.Linear(64 * 8 * 8, z_dim)
-        # Decoder implementation
+
+
+        # Decoder implementation same as the GANs generator.
         self.hidden_layer_decoder = nn.Sequential(
             nn.Linear(z_dim + label_dim, 64 * 8 * 8), 
             nn.BatchNorm1d(64 * 8 * 8),
@@ -63,7 +65,6 @@ class VAE(nn.Module):
         return u, log_var, out
 
     def generate_images(self, z, labels):
-        # decoder_output 
         label_embedding = self.label_embedding(labels)
         out = self.hidden_layer_decoder(torch.cat([z,label_embedding],dim = 1))
         out = out.view(-1,64, 8, 8)

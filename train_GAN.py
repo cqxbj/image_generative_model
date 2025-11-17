@@ -45,7 +45,6 @@ discriminator_optimizer = optim.AdamW(discriminator.parameters(), lr=lr_d)
 generator_optimizer = optim.AdamW(generator.parameters(), lr=lr_g)
 
 freq_gen_sample = 1
-freq_save_model = 20
 # ----------------------------------------------------------------------------------------------------------------------------------------------
 ### step -3 GANs training
 start_training = True
@@ -64,9 +63,6 @@ if start_training:
             batch_size = len(real_images)
             real_images = real_images.to(device)
             labels = labels.to(device)
-
-
-
 
             '''
             To understand this training process - > check GANs loss function:
@@ -130,8 +126,8 @@ if start_training:
             print(f"t - {n_repeat_generator}")
         ### generate some samples 
         if epoch % freq_gen_sample == 0:
-            my_F.gans_save_samples(generator, epoch=epoch, input_str="eeeee aaaaa ABCDEFGHIJK abcdefghijklmn owyx")
-            my_F.plot_list(d_losses,g_losses,labels=["Discriminator losses", "Generator losses"], model_name="gans")
+            my_F.gans_save_samples(generator, epoch=epoch)
+            my_F.plot_list(d_losses, g_losses, labels=["Discriminator losses", "Generator losses"], model_name="gans")
 
     ### save parameters
     torch.save(generator.state_dict(),f"{parameters_load_path+model_name}_G.pth")

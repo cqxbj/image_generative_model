@@ -11,7 +11,7 @@ class Generator(nn.Module):
         self.z_dim = z_dim
         self.n_class = n_class
 
-        self.label_embedding = nn.Embedding(self.n_class, label_dim)
+        self.label_embedding = nn.Embedding(n_class, label_dim)
 
         self.linear = nn.Sequential(
             nn.Linear(z_dim + label_dim, 64 * 8 * 8),
@@ -34,9 +34,9 @@ class Generator(nn.Module):
         )
 
     def forward(self, z_noise, labels):
-        label_embedding = self.label_embedding(labels)
-        hidden_input = self.linear(torch.concat([z_noise, label_embedding],dim=1))
-        t_conv_input = hidden_input.view(-1,64,8,8)
+        label_emb = self.label_embedding(labels)
+        hidden_input = self.linear(torch.concat([z_noise, label_emb],dim=1))
+        t_conv_input = hidden_input.view(-1,64, 8, 8)
         out = self.generator(t_conv_input)
         return out
 
