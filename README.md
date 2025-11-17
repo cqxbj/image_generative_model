@@ -1,14 +1,12 @@
 # Image Generative Model
 7015 Group Project
 
-# Train models
-Run [train_model](./train_DDPM.py)
+# GANs 
+<img width="15700" height="10296" alt="gans-sample" src="https://github.com/user-attachments/assets/2e33eb31-471a-4e88-b82e-75c716438a43" />
 
+# VAE 
+<img width="15700" height="10296" alt="vae-sample" src="https://github.com/user-attachments/assets/f1148f7f-4fc8-415e-acd8-19f4c678749c" />
 
-# Examples
-
-<img width="1245" height="777" alt="2367c61996cd41f0024ec0307f4b2e24" src="https://github.com/user-attachments/assets/f9e33a49-506c-4b02-b606-ded9a00ccf2b" />
-
-
+# DDPM 
 <img width="1280" height="960" alt="ddpm" src="https://github.com/user-attachments/assets/32e9835a-20f0-462d-9331-e85339bb67cf" />
 
