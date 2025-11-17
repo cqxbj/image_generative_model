@@ -1,5 +1,5 @@
 import torch
-import dataloader_generator
+import data_process
 import torch.optim 
 import torch.nn.functional as F
 import functions as my_F
@@ -15,7 +15,7 @@ import time
 
 ## train DDPM for cifar_10
 device = "cuda" if torch.cuda.is_available() else "cpu"
-dataloader = dataloader_generator.generate_CIFAR_10_dataloader()
+dataloader = data_process.generate_CIFAR_10_dataloader()
 
 
 # models parameters
@@ -76,10 +76,10 @@ if start_training:
             end_time = time.time()
             print(f"epoch {epoch} with loss: {loss},  time: {end_time - start_time:.2f}")
             if epoch % fre_generate_samples == 0 :
-                my_F.plot_values(loss_list, model_name=modelname, start_index=epoch_startindex)
+                my_F.plot_list(loss_list, model_name=modelname, start_index=epoch_startindex)
                 my_F.ddpm_save_samples(model, diffuser, n_class= n_label, modelname = modelname, epoch_index=epoch)
             if epoch % fre_save_model == 0 :
                 torch.save(model.state_dict(),parameters_load_path + modelname + ".pth")
-    my_F.plot_values(loss_list, model_name=modelname, start_index=epoch_startindex)
+    my_F.plot_list(loss_list, model_name=modelname, start_index=epoch_startindex)
     torch.save(model.state_dict(),parameters_load_path + modelname + ".pth")
     np.save(f"{modelname}{epoch_startindex}_losses.py", np.array(loss_list))

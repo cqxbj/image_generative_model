@@ -1,5 +1,5 @@
-import dataloader_generator 
-from model_VAE.con_vae import Conv_VAE
+import data_process 
+from model_VAE.vae import VAE
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -26,16 +26,16 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 #model parameter
 model_name = "vae"
-z_dim = 128
-n_class = 37
+z_dim = 256
+n_class = 63
 model = my_F.load_vae_model(model_name, z_dim=z_dim, n_class=n_class, device=device)
 
 
 #hyper parameter
-lr = 0.0003
+lr = 0.0002
 optimizer =  optim.AdamW(model.parameters(), lr=lr)
-dataloader = dataloader_generator.generate_Handwritten_dataloader()
-epoches = 200
+dataloader = data_process.generate_Handwritten_dataloader()
+epoches = 250
 
 start_training = True
 if start_training:
@@ -49,12 +49,15 @@ if start_training:
         sum_rct_loss = 0
         sum_kl_loss = 0
         count = 0
-        for x, labels in dataloader:
-            x = x.to(device)
+        for images, labels in dataloader:
+            
+            images = images.to(device)
             labels = labels.to(device)
+
+
             optimizer.zero_grad()
-            u, log_var,  out = model(x, labels)
-            loss, reconstrut_loss, kl_loss= __vae_loss_function(u, log_var, out, x)
+            u, log_var,  gen_images = model(images, labels)
+            loss, reconstrut_loss, kl_loss= __vae_loss_function(u, log_var, gen_images, images)
             loss.backward()
 
             optimizer.step()
@@ -71,13 +74,18 @@ if start_training:
             rct_loss_list.append(sum_rct_loss/count)
             kl_loss_list.append(sum_kl_loss/count)
                 
-            print(f"\t loss:", (sum_loss/count))
-            print(f"\t rct_loss:", (sum_rct_loss/count))
-            print(f"\t kl_loss:", (sum_kl_loss/count))  
-            my_F.vae_save_samples(model, epoch= epoch,input_str="DAAI COMP7015 XIANGBOJIE")
-            my_F.plot_values(loss_list, rct_loss_list, kl_loss_list, start_index=1, labels=["loss", "rct_loss", "kl_loss"],model_name=model_name)
+            print(f"\t loss:", (loss_list[-1]))
+            print(f"\t rct_loss:", (rct_loss_list[-1]))
+            print(f"\t kl_loss:", (kl_loss_list[-1]))  
 
-    my_F.plot_values(loss_list, rct_loss_list, kl_loss_list, start_index=1,labels=["loss", "rct_loss", "kl_loss"], model_name=model_name)
-    my_F.vae_save_samples(model,epoch= epoch, device= device)
+            my_F.vae_save_samples(model, epoch= epoch)
+
+            my_F.plot_list(loss_list, 
+                           rct_loss_list, 
+                           kl_loss_list, 
+                           start_index=1, 
+                           labels=["loss", "rct_loss", "kl_loss"],
+                           model_name=model_name)
+            
     torch.save(model.state_dict(),parameters_load_path+model_name+".pth")
 

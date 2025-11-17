@@ -9,9 +9,10 @@ import torchvision.utils as utils
 from model_DDPM.unet import UNet
 from model_DDPM.diffuser import Diffuser
 from pytorch_fid import fid_score
-from model_VAE.con_vae import Conv_VAE
-from dataloader_generator import HandWrittenDataset
+from model_VAE.vae import VAE
+from data_process import HandWrittenDataset
 from model_GANs.gans import Discriminator, Generator  
+from data_process import Tokenizer
 import shutil
 import os
 
@@ -96,8 +97,8 @@ def ddpm_save_samples(
 '''
 
 def load_gans_model(model_name, 
-                    z_dim = 128,
-                    n_class = 37,
+                    z_dim = 256,
+                    n_class = 63,
                     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
 
     parameters_load_path ="trained_parameters/" 
@@ -120,27 +121,21 @@ def load_gans_model(model_name,
     return generator, discriminator
 
 
-
-
-
 def gans_generate_imgs(
         generator:Generator,
         save_folder = "_FID_imgs/gans",
-        device = "cuda" if torch.cuda.is_available() else "cpu",
-        n_100 = 100):
-    
+        device = "cuda" if torch.cuda.is_available() else "cpu"):
+    if generator.n_class <= 1: return
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
 
-    if generator.n_class > 0:
-        labels = torch.tensor([i for i in range(generator.n_class - 1) for _ in range(100)],dtype=torch.long).to(device)
-    
     generator.eval()
     with torch.no_grad():
+        labels = torch.tensor([i for i in range(generator.n_class) for _ in range(100)],dtype=torch.long).to(device)
         i = 0
-        for _ in range(10):
-            z = torch.randn(len(labels), generator.z_dim).to(device)
-            imgs = generator(z, labels=labels)
+        for _ in range(2):
+            noise = torch.randn(len(labels), generator.z_dim).to(device)
+            imgs = generator(noise, labels=labels)
             for img in imgs:
                 img = transforms.ToPILImage()(img)
                 img.save(os.path.join(save_folder, f'{i:05d}.png'))
@@ -148,9 +143,8 @@ def gans_generate_imgs(
     generator.train()
 
 
-
-
 def gans_save_samples(generator, 
+                     show_now=False,
                      black_in_white = True,
                      input_str = "WE ALL LIKE COMP7015", 
                      epoch = 0 ,
@@ -161,61 +155,37 @@ def gans_save_samples(generator,
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
 
-
-    labels, max_len = muti_lines_tokenize(input_str)
-    labels = labels.to(device)
-    # labels = handwriting_tokenize(input_str).to(device)
-        
     generator.eval()
     with torch.no_grad():
+        tk = Tokenizer()
+        labels, max_len = tk.muti_lines_tokenize(input_str)
+        labels = labels.to(device)
         noises = torch.randn(len(labels), generator.z_dim).to(device)
         images = generator(noises, labels)
         images = images.to("cpu")
     generator.train()
 
-    if black_in_white: images = 1 - images
-    grid_image = utils.make_grid(images, nrow=max_len, normalize=True, padding=0)
-    plt.figure(figsize=(80, 80))
+    if black_in_white: images = 1 -images
+    grid_image = utils.make_grid(images, nrow=max_len, normalize=False, padding=0)
+    plt.figure(figsize=(200, 160))
     plt.imshow(grid_image.permute(1,2,0))
     plt.axis("off")
     plt.savefig(f"{save_folder}/{model_name}{epoch}",
                 bbox_inches='tight', 
                 pad_inches=1)
-    plt.close()    
+    if show_now : plt.show()
+    else: plt.close()    
 
 ''' 
     3. VAE functions.
 '''
 
-list = ['0','1','2','3','4','5','6','7','8','9',
-                    "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",' ']
-char_dict = {char: index for index, char in enumerate(list)}
-def handwriting_tokenize(str):    
-    tokens = []
-    for s in str:
-         tokens.append(char_dict.get(s, 36))
-    return torch.tensor(tokens)
-
-
-
-def muti_lines_tokenize(str:str):
-    lines = str.split("\n")
-    max_len = max([len(e)for e in lines])
-    new_str = ""
-    for each_line in lines:
-        each_line = each_line + " " * (max_len - len(each_line))
-        new_str += each_line
-    tokens = handwriting_tokenize(new_str)    
-    return tokens, max_len  
-
-
-
 def load_vae_model(
         model_name,
-        z_dim = 128, 
-        n_class = 40, 
+        z_dim = 256, 
+        n_class = 63, 
         device = "cuda" if torch.cuda.is_available() else "cpu"):
-    model = Conv_VAE(z_dim = z_dim, name=model_name, n_class= n_class)
+    model = VAE(z_dim = z_dim, n_class= n_class)
     parameters_load_path ="trained_parameters/" 
     try:
         model.load_state_dict(torch.load(parameters_load_path + model_name + ".pth")) 
@@ -231,19 +201,20 @@ def load_vae_model(
 
 #normally we call this function to generate imgs for FID testing.
 def vae_generate_imgs(
-        model:Conv_VAE, 
+        model:VAE, 
         save_folder = "_FID_imgs/vae", 
         device = "cuda" if torch.cuda.is_available() else "cpu"):
     
+    if model.n_class <= 1: return
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
 
-    labels = torch.tensor([i for i in range(model.n_class - 1) for _ in range(100)],dtype=torch.long).to(device)
- 
-    i = 0
     model.eval()
     with torch.no_grad():
-        for _ in range(10): 
+        
+        labels = torch.tensor([i for i in range(model.n_class) for _ in range(100)],dtype=torch.long).to(device)
+        i = 0
+        for _ in range(2): 
             z = torch.randn(len(labels), model.z_dim).to(device)
             imgs = model.generate_images(z, labels=labels)
             for img in imgs:
@@ -253,37 +224,44 @@ def vae_generate_imgs(
     model.train()
 
 
-def vae_save_samples(model:Conv_VAE, 
+def vae_save_samples(model:VAE, 
+                     show_now = False,
                      black_in_white = True,
+                     model_name = "vae",
                      input_str = "WE ALL LIKE COMP7015", 
                      epoch = 0 ,
                      device = "cuda" if torch.cuda.is_available() else "cpu", 
                      save_folder = "_samples/vae_grid_images"):
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
+ 
     model.eval()
-    len_str = len(input_str)
+    tk = Tokenizer()
     with torch.no_grad():
-        z = torch.randn(len_str, model.z_dim).to(device)
-        labels = handwriting_tokenize(input_str).to(device)
-        images = model.generate_images(z, labels)
-        if black_in_white : images = 1 - images
-        images = images.to("cpu")
-    grid_image = utils.make_grid(images,normalize=True, nrow=min(50, len_str), padding=0)
+
+        labels, max_len = tk.muti_lines_tokenize(input_str)
+        labels = labels.to(device)
+        noises = torch.randn(len(labels), model.z_dim).to(device)
+        images = model.generate_images(noises, labels)
+        
+    if black_in_white : images = 1-images
+    images = images.to("cpu")
+    model.train()
+    grid_image = utils.make_grid(images,normalize=False, nrow=max_len, padding=0)
+    plt.figure(figsize=(200, 160))
     plt.imshow(grid_image.permute(1,2,0))
     plt.axis("off")
-    plt.savefig(f"{save_folder}/{model.name}{epoch}", 
+    plt.savefig(f"{save_folder}/{model_name}{epoch}", 
                 bbox_inches='tight', 
                 pad_inches=1)
-    plt.close()
-    model.train()
-
+    if show_now : plt.show()
+    else: plt.close()
 
 ''' 
     4. Others.
 '''
 
-def plot_values(
+def plot_list(
         losses1 = [], losses2 = [], losses3 = [], labels = None,       
         model_name = "" ,start_index = 0, save_folder = "plots_pdf"):
     

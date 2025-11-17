@@ -1,8 +1,9 @@
-
-
 /_samples/*
 /__pycache__/*
 /plots_pdf/*
 /_FID_imgs/*
+/model_DDPM/__pycache__/*
+/model_VAE/__pycache__/*
+/model_GANs/__pycache__/*
 
 
