@@ -75,18 +75,18 @@ if start_training:
             discriminator_optimizer.zero_grad()
             # we need to train this Discriminator with a real batch and a noise batch
             # on a real batch
-            ground_truth = torch.ones(batch_size,1).to(device)
+            true_positive = torch.ones(batch_size,1).to(device)
             discriminator_prediction = discriminator(real_images, labels)
-            d_loss_1 = F.binary_cross_entropy(discriminator_prediction, ground_truth)
+            d_loss_1 = F.binary_cross_entropy(discriminator_prediction, true_positive)
             
             # on a fake batch
             noises = torch.randn(batch_size, z_dim).to(device)
             # gen_labels = torch.randint(0, n_class, (batch_size,)).to(device)
             with torch.no_grad():
                 fake_images = generator(noises, labels)
-            false_truth = torch.zeros(batch_size,1).to(device)
+            false_positive = torch.zeros(batch_size,1).to(device)
             discriminator_prediction_on_fake = discriminator(fake_images,labels)
-            d_loss_2 = F.binary_cross_entropy(discriminator_prediction_on_fake, false_truth)
+            d_loss_2 = F.binary_cross_entropy(discriminator_prediction_on_fake, false_positive)
             
             # train
             d_loss = (d_loss_1 + d_loss_2)/2
@@ -103,9 +103,9 @@ if start_training:
                 generative_images = generator(new_noises, labels)  
                 
                 discriminartor_predictions = discriminator(generative_images, labels)
-                false_truth = torch.ones(batch_size,1).to(device)
+                false_positive = torch.ones(batch_size,1).to(device)
                
-                g_loss = F.binary_cross_entropy(discriminartor_predictions, false_truth)
+                g_loss = F.binary_cross_entropy(discriminartor_predictions, false_positive)
                 g_loss.backward()
                 generator_optimizer.step()
                 sum_g_loss += g_loss
