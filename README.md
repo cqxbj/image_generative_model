@@ -1,10 +1,9 @@
 # Image Generative Model
 
-# DDPM
-# add_noise  and  de_noise demo
+# DDPM add_noise AND de_noise demo
 <img width="389" height="389" alt="demo_addnoise" src="https://github.com/user-attachments/assets/c7dda2ae-7898-4d2b-ae3d-f0266ae19482" />
 <img width="389" height="389" alt="demo_denoise" src="https://github.com/user-attachments/assets/c352356f-4a04-4109-be60-b54af68d11cb" />
-# 10 class sample
+# DDPM 10_class_sample
 <img width="389" height="389" alt="ddpm" src="https://github.com/user-attachments/assets/32e9835a-20f0-462d-9331-e85339bb67cf" />7015 Group Project
 
 # GANs 
