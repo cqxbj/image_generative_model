@@ -46,7 +46,7 @@ def generate_Handwritten_dataloader():
     return DataLoader(dataset, batch_size= 128, shuffle= True)
 
 class HandWrittenDataset(Dataset):
-    def __init__(self, path = "./data/handwritten_data" ):
+    def __init__(self, path = "./data/handwriting_data" ):
         super().__init__()
         self.np_path = path
         all_char_list = []
@@ -78,12 +78,12 @@ def __imgs_to_numpy():
     folder_path = "data/all_char"
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-    save_folder = "data/handwritten_data"
+    save_folder = "data/handwriting_data"
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
 
     # add some empty imgs
-    save_path = f"data/handwritten_data/__space.npy"
+    save_path = f"data/handwriting_data/__space.npy"
     character_empty_np = np.zeros((1000,32,32,1),dtype=np.uint8)
     np.save(save_path, character_empty_np)
     
