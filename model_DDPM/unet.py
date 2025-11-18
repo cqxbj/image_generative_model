@@ -16,15 +16,15 @@ class SelfAttention(nn.Module):
     def forward(self, x):
         batch_size, C, H, W = x.shape
 
-        q = self.query(x).view(batch_size, -1, H * W).transpose(1, 2)  # [B, HW, C//8]
-        k = self.key(x).view(batch_size, -1, H * W)  # [B, C//8, HW]
-        v = self.value(x).view(batch_size, -1, H * W)  # [B, C, HW]
+        q = self.query(x).view(batch_size, -1, H * W).transpose(1, 2)
+        k = self.key(x).view(batch_size, -1, H * W)  
+        v = self.value(x).view(batch_size, -1, H * W)  
         
         attention = torch.bmm(q, k)  # [B, HW, HW]
         attention = attention / (q.size(-1) ** 0.5)
         attention = torch.softmax(attention, dim=-1)
         
-        out = torch.bmm(v, attention.permute(0, 2, 1))  # [B, C, HW]
+        out = torch.bmm(v, attention.permute(0, 2, 1))
         out = out.view(batch_size, C, H, W)
         
         out = self.proj(out)
@@ -118,7 +118,7 @@ class UNet(nn.Module):
         self.output = nn.Conv2d(64,in_channel, kernel_size=1)
 
     def forward(self, x, t_steps, labels = None):
-        v_time = pos_encoding(t_steps, self.time_dim, device=x.device).to(x.device)
+        v_time = time_encoding(t_steps, self.time_dim, device=x.device).to(x.device)
 
         if labels is not None:
             v_time += self.label_embeding(labels).to()
@@ -172,7 +172,7 @@ class UNet(nn.Module):
 
         return out
 
-def pos_encoding(ts, out_dim, device = "cpu"):
+def time_encoding(ts, out_dim, device = "cpu"):
 
     def _encoding(t, out_dim, device = device):
         t, D = t, out_dim

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torchvision
 import numpy as np
 
-
+# it can performs add_nosie and de_noise.
 class Diffuser:
     def __init__(self, T = 1000, device = "cpu"):
         self.b_start = 0.0001
@@ -17,10 +17,15 @@ class Diffuser:
 
         self.device = device
 
+
+    # according to the ddpm algorithm, actually we do not need to add_noise step by step
+    # we can calculate a final T result in one step.
+    # x_t_0 is the original img in tensor.
     def add_noise(self, x_t_0, t):
         if (t> self.T).all() or (t<1).all(): 
             print("here not add noise")
             return x_t_0
+        
         t = t - 1
         alp_cum_t = self.alps_cumprod[t]
 
@@ -31,6 +36,9 @@ class Diffuser:
         noise = torch.randn_like(x_t_0).to(self.device)
         return torch.sqrt(alp_cum_t)*x_t_0 + torch.sqrt(1-alp_cum_t)*noise, noise
     
+
+
+    # when we do de_noise, we need to perform de_noise step by step. Unet is a noise predictor.
     def de_noise(self, x, t, model, labels = None):
         if (t>self.T).all() or (t<1).all(): 
             print("here not de noise")
@@ -81,34 +89,6 @@ class Diffuser:
                 x = self.de_noise(x,t, model)
         model.train()
         return x
-
-# img_path = os.path.join("ai_images/CIFAR_GANs_0.png") 
-# print(img_path)
-# test_img = plt.imread(img_path)
-# to_tensor_img_f = torchvision.transforms.ToTensor()
-# x = to_tensor_img_f(test_img)
-
-# test_imgs = []
-
-# diffuser = Diffuser()
-# T = diffuser.T
-# for i in range(T):
-#     if i % 100 == 0:
-#         x_img = diffuser.add_noise(x, i)
-#         img = reverse_to_img(x_img)
-#         test_imgs.append(img)   
-#     # beta = betas[i]
-#     # noise = torch.randn_like(x)
-#     # x = torch.sqrt(1- beta)* x + torch.sqrt(beta)*noise
-
-# # show imgs
-# plt.figure(figsize=(20,20))
-# for i, img in enumerate(test_imgs):
-#     plt.subplot(2,5,i+1)
-#     plt.imshow(img)
-#     plt.axis("off")
-# plt.show()
-
 
 
 
