@@ -34,7 +34,7 @@ model = my_F.load_vae_model(model_name, z_dim=z_dim, n_class=n_class, device=dev
 #hyper parameter
 lr = 0.0002
 optimizer =  optim.AdamW(model.parameters(), lr=lr)
-dataloader = data_process.generate_Handwritten_dataloader()
+dataloader = data_process.generate_Handwriting_dataloader()
 epoches = 250
 
 start_training = True

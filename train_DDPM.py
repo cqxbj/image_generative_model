@@ -55,9 +55,10 @@ if start_training:
         start_time = time.time()
         for img, labels in dataloader:
             optimizer.zero_grad()
-            x = img.to(device)
             batch_size = len(x)
+            x = img.to(device)
             t = torch.randint(1,T+1,size=(batch_size,)).to(device)
+
             x_noised, real_noise = diffuser.add_noise(x, t)
             if n_label > 0 :
                 labels = labels.to(device)
@@ -70,6 +71,7 @@ if start_training:
             loss_sum += loss.item()
             cnt += 1 
             # print(f"{loss}")
+        
         if epoch > 0:
             loss = loss_sum/cnt
             loss_list.append(loss)
@@ -80,6 +82,7 @@ if start_training:
                 my_F.ddpm_save_samples(model, diffuser, n_class= n_label, modelname = modelname, epoch_index=epoch)
             if epoch % fre_save_model == 0 :
                 torch.save(model.state_dict(),parameters_load_path + modelname + ".pth")
+
     my_F.plot_list(loss_list, model_name=modelname, start_index=epoch_startindex)
     torch.save(model.state_dict(),parameters_load_path + modelname + ".pth")
-    np.save(f"{modelname}{epoch_startindex}_losses.py", np.array(loss_list))
+    # np.save(f"{modelname}{epoch_startindex}_losses.py", np.array(loss_list))

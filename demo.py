@@ -81,22 +81,42 @@ Group:42  IMAGE GENERATIVE MODEL
 
 
 if __name__ == '__main__':
+    print("##### demo starts")
+    print("\n")
 
-
-    print("################demo starts")
-    # demo vae
+    print("demo GAN")
+    print("loading GANs model ......")
     model_name = "gans"
-    print("loading GANs model")
     gan_g, gan_d = my_F.load_gans_model(model_name,)
-    print("generating GANs sample")
-    my_F.gans_save_samples(gan_g, epoch=-1111, input_str=title_gans+test_Str, show_now=True)
-    print("################")
-    model_name = "vae"
-    print("loading VAE model")
-    vae_model = my_F.load_vae_model(model_name)
-    print("generating VAE sample")
-    my_F.vae_save_samples(vae_model, epoch= -1111, input_str=title_vae+test_Str, show_now=True)
+    print("generating GANs sample ......")
+    my_F.gans_save_samples(gan_g, input_str=title_gans+test_Str,save_folder="demo_save")
+    print("GAN samples saved in folder demo_save")
 
+    # demo vae
+    print("\n\n")
+    print("demo VAE")
+    model_name = "vae"
+    print("loading VAE model ......")
+    vae_model = my_F.load_vae_model(model_name)
+    print("generating VAE samples ......")
+    my_F.vae_save_samples(vae_model, input_str=title_vae+test_Str, save_folder="demo_save")
+    print("VAE samples saved in folder demo_save")
+
+
+    # demo ddpm
+    print("\n\n")
+    print("demo DDPM")
+    print("loading DDPM model ......")
+    model_name = "ddpm"
+    model, diffuser = my_F.load_ddpm_model(model_name)
+    print("generating DDPM samples ......")
+    my_F.demo_addnoise(diffuser, save_folder="demo_save")
+    my_F.demo_denoise(model, diffuser, save_folder="demo_save")
+    my_F.ddpm_save_samples(model, diffuser, modelname="ddpm", save_folder="demo_save")
+    print("DDPM samples saved in folder demo_save")
+
+    print("\n\n")
+    print("##### demo ends")
 
     #calculate FID
     # print("################")

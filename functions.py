@@ -4,15 +4,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.transforms as transforms
 import torchvision
+import data_process
+import random
 from torchvision.utils import save_image
 import torchvision.utils as utils
 from model_DDPM.unet import UNet
 from model_DDPM.diffuser import Diffuser
 from pytorch_fid import fid_score
 from model_VAE.vae import VAE
-from data_process import HandWrittenDataset
+from data_process import HandWritingDataset
 from model_GANs.gans import Discriminator, Generator  
 from data_process import Tokenizer
+
 import shutil
 import os
 
@@ -31,16 +34,13 @@ import os
     1. DDPM functions.
 '''
 
-def demo_denoise():
-    pass
-
-def demo_addnoise():
-    pass
 
 def load_ddpm_model(
         model_name, 
-        is_attention_on = False, is_residual_on = False, 
-        n_class = 10, T = 1000, 
+        is_attention_on = True, 
+        is_residual_on = True, 
+        n_class = 10, 
+        T = 1000, 
         device = "cuda" if torch.cuda.is_available() else "cpu"):
     
     model = UNet(attention=is_attention_on,residual_on=is_residual_on, n_class= n_class).to(device)
@@ -77,20 +77,72 @@ def ddpm_generate_imgs(
 #normally use this function for visualization and demonstration              
 def ddpm_save_samples(
         model: UNet, diffuser : Diffuser,  modelname = "modelname",
-        epoch_index = 0, save_folder="_samples/ddpm_grid_images"):
+        epoch_index = 0, save_folder="_samples/ddpm_grid_images", select_class = -1):
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
     labels = None
     if model.n_class > 0:
-        labels = torch.tensor([i for i in range(model.n_class) for _ in range(10)], dtype=torch.long)
+        if select_class >=0 : labels = torch.tensor([select_class for i in range(model.n_class) for _ in range(10)], dtype=torch.long)
+        else : labels = torch.tensor([i for i in range(model.n_class) for _ in range(10)], dtype=torch.long)
     imgs_in_tensor = diffuser.denoised_sampling(model, imgs_shape=(100, 3, 32, 32), labels=labels)
     imgs_in_tensor = imgs_in_tensor.to("cpu")
     grid_image = utils.make_grid(imgs_in_tensor, nrow=10, normalize=True, value_range=(-1,1))
     plt.imshow(grid_image.permute(1,2,0))
     plt.axis("off")
-    plt.savefig(f"{save_folder}/{modelname}{epoch_index}", bbox_inches='tight', pad_inches=1)
+    plt.savefig(f"{save_folder}/{modelname}{epoch_index}", bbox_inches='tight', pad_inches=0.1)
     plt.close()
 
+# add noises on random_10 imgs from cifar_10 dataset.
+def demo_addnoise(diffuser ,save_folder = "demo_save"):
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)
+    
+    data_set = data_process.generate_CIFAR_10_dataset()
+    random_10_index = torch.randint(0, len(data_set) - 1, size=(10,))
+    random_10_images = [data_set[i][0] for i in random_10_index]
+    imgs_t0_to_t1000 = []
+    random_10_images = torch.stack(random_10_images).to(diffuser.device)
+    # add noise fro images from 100 - 1000
+    for i in range(5,1000,100):
+        t = torch.tensor([i]*10).to(diffuser.device)
+        img_noised, _ = diffuser.add_noise(random_10_images, t=t)
+        imgs_t0_to_t1000.extend(img_noised)
+    imgs_t0_to_t1000 = torch.stack(imgs_t0_to_t1000).to("cpu")
+
+    grid_image = utils.make_grid(imgs_t0_to_t1000, nrow=10, normalize=True, value_range=(-1,1))
+    plt.imshow(grid_image.permute(1,2,0))
+    plt.axis("off")
+    plt.savefig(f"{save_folder}/ddpm_addnoise", bbox_inches='tight', pad_inches=0.1)
+    plt.close()
+            
+# demo denoise process with our pretrained model
+def demo_denoise(model, diffuser, save_folder = "demo_save"):
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)
+
+    T = diffuser.T
+    labels = torch.tensor([i for i in range(10)]).to(diffuser.device)
+    imgs = torch.randn((10,3,32,32)).to(diffuser.device)
+
+    imgs_T1000_to_T0 = [] 
+    model.eval()
+    for i in range(T, 0, -1):
+        t = torch.tensor([i]*10,dtype =torch.long).to(diffuser.device)
+        imgs = diffuser.de_noise(imgs, t, model, labels)
+        
+        if (i % 100 == 0 and i != 1000) or (i == 1):
+            imgs_T1000_to_T0.extend(imgs)
+    model.train()
+    
+    imgs_T1000_to_T0 = torch.stack(imgs_T1000_to_T0)
+    imgs_T1000_to_T0 = imgs_T1000_to_T0.to("cpu")
+
+    imgs_T1000_to_T0 = (torch.clamp(imgs_T1000_to_T0, -1, 1) + 1 ) / 2
+    grid_image = utils.make_grid(imgs_T1000_to_T0, nrow=10)
+    plt.imshow(grid_image.permute(1,2,0))
+    plt.axis("off")
+    plt.savefig(f"{save_folder}/ddpm_denoise", bbox_inches='tight', pad_inches=0.1)
+    plt.close()
 
 ''' 
     2. GANs functions.
@@ -320,7 +372,7 @@ def save_hand_writing_images(save_folder = "hw_train"):
     save_path = "_FID_imgs/" + save_folder
     if not os.path.exists(save_path):
         os.makedirs(save_path)    
-    dataset = HandWrittenDataset()
+    dataset = HandWritingDataset()
     for i in range(len(dataset)):
         image, _ = dataset[i]
         image_pil = transforms.ToPILImage()(image)

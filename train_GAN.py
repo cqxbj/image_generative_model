@@ -29,7 +29,7 @@ parameters_load_path ="trained_parameters/"
 generator, discriminator = my_F.load_gans_model(model_name, z_dim=z_dim, n_class=n_class, device=device)
 
 
-data_loader = dg.generate_Handwritten_dataloader()
+data_loader = dg.generate_Handwriting_dataloader()
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------
 

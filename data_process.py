@@ -5,47 +5,54 @@ import numpy as np
 import torch
 from PIL import Image
 
-def generate_MNIST_dataloader():
-    transform = transforms.Compose([
-        transforms.ToTensor()
-        ]
-        )
-    mnist_dataset = datasets.MNIST(
-            root="./data",
-            train=True,
-            download=True,
-            transform = transform
-        )
+# def generate_MNIST_dataloader():
+#     transform = transforms.Compose([
+#         transforms.ToTensor()
+#         ]
+#         )
+#     mnist_dataset = datasets.MNIST(
+#             root="./data",
+#             train=True,
+#             download=True,
+#             transform = transform
+#         )
 
-    return DataLoader(
-        mnist_dataset,
-        batch_size = 1024,
-        shuffle=True
-    )
+#     return DataLoader(
+#         mnist_dataset,
+#         batch_size = 1024,
+#         shuffle=True
+#     )
 
 
-def generate_CIFAR_10_dataloader():
+# 1. cifar_10
+
+def generate_CIFAR_10_dataset():
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    
     cifar_dataset = datasets.CIFAR10(
             root="./data",
             train=True,
             download=True,
             transform = transform
         )
+    return cifar_dataset
+
+def generate_CIFAR_10_dataloader():
     return DataLoader(
-        cifar_dataset,
+        generate_CIFAR_10_dataset(),
         batch_size = 128,
         shuffle=True
     )
 
+# 2. hand_writting
 
-def generate_Handwritten_dataloader():
-    dataset = HandWrittenDataset() 
+def generate_Handwriting_dataloader():
+    dataset = HandWritingDataset() 
     return DataLoader(dataset, batch_size= 128, shuffle= True)
 
-class HandWrittenDataset(Dataset):
+class HandWritingDataset(Dataset):
     def __init__(self, path = "./data/handwriting_data" ):
         super().__init__()
         self.np_path = path
@@ -71,7 +78,7 @@ class HandWrittenDataset(Dataset):
         label = torch.tensor(label)
         return img, label
 
-HandWrittenDataset()
+
 # preprocess
 # convert hw imgs to numpy.
 def __imgs_to_numpy():
