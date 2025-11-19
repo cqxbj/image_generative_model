@@ -246,7 +246,7 @@ def load_vae_model(
         print("VAE load pretrained_parameters error")
     finally:
         num_param =  sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print(f"vae model size:{num_param} parameters")
+        print(f"VAE model size:{num_param} parameters")
     model.to(device)
     return model
 
@@ -314,7 +314,7 @@ def vae_save_samples(model:VAE,
 '''
 
 def plot_list(
-        losses1 = [], losses2 = [], losses3 = [], labels = None,       
+        losses1 = [], losses2 = [], losses3 = [], eval_losses = [], eval_interval = 10, eval_start_index = 10, labels = None,       
         model_name = "" ,start_index = 0, save_folder = "plots_pdf"):
     
     if not os.path.exists(save_folder):
@@ -340,6 +340,11 @@ def plot_list(
         epochs3 = np.arange(len(losses3)) + start_index
         plt.plot(epochs3, losses3, label=labels[2], linewidth=2)
     
+    if len(eval_losses) > 0:
+        eval_epochs = np.arange(len(eval_losses)) * eval_interval + eval_start_index
+        plt.plot(eval_epochs, eval_losses, label=labels[3] if len(labels) > 3 else "Eval Loss", 
+                marker='o', markersize=4, linewidth=2, linestyle='--', alpha=0.8) 
+    
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
     plt.title(f"Training Losses - {model_name}")
@@ -361,6 +366,8 @@ def calcualte_fid(path1, path2):
             batch_size=128,
             dims=2048
         )
+
+        fid_score.save_fid_stats
         return score
          
     else:
@@ -368,11 +375,14 @@ def calcualte_fid(path1, path2):
         return -1
 
 # normally we call those two go generate imgs for FID test
-def save_hand_writing_images(save_folder = "hw_train"):
+def save_hand_writing_images(train = True):
+
+    if train: save_folder = "hw_train"
+    else : save_folder = "hw_val"
     save_path = "_FID_imgs/" + save_folder
     if not os.path.exists(save_path):
         os.makedirs(save_path)    
-    dataset = HandWritingDataset()
+    dataset = HandWritingDataset(train=train)
     for i in range(len(dataset)):
         image, _ = dataset[i]
         image_pil = transforms.ToPILImage()(image)

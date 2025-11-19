@@ -5,24 +5,6 @@ import numpy as np
 import torch
 from PIL import Image
 
-# def generate_MNIST_dataloader():
-#     transform = transforms.Compose([
-#         transforms.ToTensor()
-#         ]
-#         )
-#     mnist_dataset = datasets.MNIST(
-#             root="./data",
-#             train=True,
-#             download=True,
-#             transform = transform
-#         )
-
-#     return DataLoader(
-#         mnist_dataset,
-#         batch_size = 1024,
-#         shuffle=True
-#     )
-
 
 # 1. cifar_10
 
@@ -48,18 +30,110 @@ def generate_CIFAR_10_dataloader():
 
 # 2. hand_writting
 
-def generate_Handwriting_dataloader():
-    dataset = HandWritingDataset() 
-    return DataLoader(dataset, batch_size= 128, shuffle= True)
+
+# preprocess
+# convert hw imgs to numpy.
+def _preprocess_imgs_to_numpy():
+    image_path = "all_char"
+    if not os.path.exists(image_path):
+        print("all_char does not exist")
+        return
+
+    save_path_train = "data/handwriting_data/train/"
+    save_path_val = "data/handwriting_data/val/"
+    if not os.path.exists(save_path_train):
+        os.makedirs(save_path_train)
+    if not os.path.exists(save_path_val):
+        os.makedirs(save_path_val)
+
+    #split imgs into train 0.9 and val 0.1
+    # add some empty imgs
+    # train 
+    train_space_path = save_path_train + "__space.npy"
+    train_space_np = np.zeros((1000,32,32,1),dtype=np.uint8)
+    np.save(train_space_path, train_space_np)
+    # val
+    val_space_path = save_path_val + "__space.npy"
+    val_space_np = np.zeros((100,32,32,1),dtype=np.uint8)
+    np.save(val_space_path, val_space_np)
+
+    for folder_name in os.listdir(image_path):
+        character_folder_path = os.path.join(image_path, folder_name)
+        print(character_folder_path)
+        character_train = []
+        character_val = []
+  
+        size = len(os.listdir(character_folder_path))
+        train_index_max = int(size*0.9)
+
+        train_paths = os.listdir(character_folder_path)[:train_index_max]
+        val_paths = os.listdir(character_folder_path)[train_index_max:]
+
+        for each_img in train_paths:
+           each_image_train_path =  os.path.join(character_folder_path, each_img)
+           img = Image.open(each_image_train_path).convert("L")
+           img_np_array = np.array(img,dtype=np.uint8)[:,:,np.newaxis]
+           character_train.append(img_np_array)
+        
+        for each_img in val_paths:
+           each_image_val_path =  os.path.join(character_folder_path, each_img)
+           img = Image.open(each_image_val_path).convert("L")
+           img_np_array = np.array(img,dtype=np.uint8)[:,:,np.newaxis]
+           character_val.append(img_np_array)
+
+        character_train_np = np.array(character_train)
+        character_val_np = np.array(character_val)
+
+        # print(folder_name)
+        # print(character_train_np.shape)
+        # print(character_val_np.shape)
+        # print("\n")
+
+        save_char_train_path = save_path_train + f"{folder_name}.npy"
+        save_char_val_path = save_path_val + f"{folder_name}.npy"
+
+        np.save(save_char_train_path,character_train_np)
+        np.save(save_char_val_path,character_val_np)
+
+def generate_Handwriting_dataloader(train = True, less_space = False):
+    dataset = HandWritingDataset(train = train, less_space = less_space) 
+    return DataLoader(dataset, 
+                      batch_size= 128, 
+                      shuffle= True)
 
 class HandWritingDataset(Dataset):
-    def __init__(self, path = "./data/handwriting_data" ):
+    def __init__(self,  train = True, less_space = False, path = "data/handwriting_data/" ):
         super().__init__()
+
+        if not os.path.exists(path):
+            print("not exist")
+            _preprocess_imgs_to_numpy()
+
+        if train : path = path + "train/"
+        else: path = path + "val/"
+
+        min = 100
+        if train: min = 1000
+
         self.np_path = path
         all_char_list = []
         labels = []
+
         for index, char_np_files in enumerate(os.listdir(self.np_path)):
             char_np = np.load(os.path.join(self.np_path,char_np_files))
+            if len(char_np) < min:
+                repeat_data = []
+                while len(repeat_data) < min:
+                    repeat_data.extend(char_np)
+
+                char_np = np.array(repeat_data[:min])
+            
+            if less_space and index == len(os.listdir(self.np_path)) - 1:
+                n_space = int(0.25*len(char_np))
+                char_np = char_np[:n_space].copy()
+
+          
+
             all_char_list.append(char_np)
             labels.extend([index] * len(char_np))
 
@@ -77,38 +151,6 @@ class HandWritingDataset(Dataset):
         img = self.transform(img)
         label = torch.tensor(label)
         return img, label
-
-
-# preprocess
-# convert hw imgs to numpy.
-def __imgs_to_numpy():
-    folder_path = "data/all_char"
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-    save_folder = "data/handwriting_data"
-    if not os.path.exists(save_folder):
-        os.makedirs(save_folder)
-
-    # add some empty imgs
-    save_path = f"data/handwriting_data/__space.npy"
-    character_empty_np = np.zeros((1000,32,32,1),dtype=np.uint8)
-    np.save(save_path, character_empty_np)
-    
-    for folder_name in os.listdir(folder_path):
-        character_folder_path = os.path.join(folder_path, folder_name)
-        print(character_folder_path)
-        character_s = []
-        for each_img in os.listdir(character_folder_path):
-           image_path =  os.path.join(character_folder_path, each_img)
-           img = Image.open(image_path).convert("L")
-           img_np_array = np.array(img,dtype=np.uint8)[:,:,np.newaxis]
-           character_s.append(img_np_array)
-        character_s_np = np.array(character_s)
-        print(character_s_np.shape)
-        save_path = f"./data/handwritten_data/{folder_name}.npy"
-        np.save(save_path,character_s_np)
-
-
 
 class Tokenizer():
     def __init__(self):

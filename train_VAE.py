@@ -33,9 +33,12 @@ model = my_F.load_vae_model(model_name, z_dim=z_dim, n_class=n_class, device=dev
 
 #hyper parameter
 lr = 0.0002
-optimizer =  optim.AdamW(model.parameters(), lr=lr)
+optimizer = optim.AdamW(model.parameters(), lr=lr)
 dataloader = data_process.generate_Handwriting_dataloader()
-epoches = 250
+val_dataloader = data_process.generate_Handwriting_dataloader(False)
+epoches = 500
+eval_freq = 10
+model_save_freq = 50
 
 start_training = True
 if start_training:
@@ -43,17 +46,41 @@ if start_training:
     loss_list = []
     rct_loss_list = []
     kl_loss_list = []
+
+    eval_loss_list = []
     for epoch in range(epoches):
         start_time = time.time()
         sum_loss = 0
         sum_rct_loss = 0
         sum_kl_loss = 0
         count = 0
+
+        #eval 
+        if epoch % eval_freq == 0 and epoch > 0:
+            model.eval()
+            val_sum_loss = 0
+            val_count = 0
+            with torch.no_grad():
+                for images, labels in val_dataloader:
+                    images = images.to(device)
+                    labels = labels.to(device)
+                    u, log_var, gen_images = model(images, labels)
+                    val_loss, val_reconstrut_loss, val_kl_loss = __vae_loss_function(u, log_var, gen_images, images)
+                    val_sum_loss += val_loss.item()
+                    val_count += 1
+
+            eval_loss = val_sum_loss / val_count
+            eval_loss_list.append(eval_loss)
+            print(f"epoch {epoch}")
+            print(f"\t Val loss: {eval_loss}")
+            model.train()
+
+
+        # training
+
         for images, labels in dataloader:
-            
             images = images.to(device)
             labels = labels.to(device)
-
 
             optimizer.zero_grad()
             u, log_var,  gen_images = model(images, labels)
@@ -69,7 +96,6 @@ if start_training:
         if epoch > 0: 
             end_time = time.time()    
             print(f"epoch {epoch} time: {end_time - start_time:.0f}")
-
             loss_list.append(sum_loss/count)
             rct_loss_list.append(sum_rct_loss/count)
             kl_loss_list.append(sum_kl_loss/count)
@@ -79,13 +105,14 @@ if start_training:
             print(f"\t kl_loss:", (kl_loss_list[-1]))  
 
             my_F.vae_save_samples(model, epoch= epoch)
-
             my_F.plot_list(loss_list, 
                            rct_loss_list, 
                            kl_loss_list, 
+                           eval_loss_list,
                            start_index=1, 
-                           labels=["loss", "rct_loss", "kl_loss"],
+                           labels=["loss", "rct_loss", "kl_loss","val_loss"],
                            model_name=model_name)
-            
+            if epoch % model_save_freq == 0:
+                torch.save(model.state_dict(),parameters_load_path+model_name+f"_epoch_{epoch}"+".pth")
     torch.save(model.state_dict(),parameters_load_path+model_name+".pth")
 

@@ -5,5 +5,5 @@
 /model_DDPM/__pycache__/*
 /model_VAE/__pycache__/*
 /model_GANs/__pycache__/*
-
+/all_char/*
 
