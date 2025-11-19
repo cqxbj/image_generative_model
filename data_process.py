@@ -8,22 +8,22 @@ from PIL import Image
 
 # 1. cifar_10
 
-def generate_CIFAR_10_dataset():
+def generate_CIFAR_10_dataset(train = True):
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     
     cifar_dataset = datasets.CIFAR10(
             root="./data",
-            train=True,
+            train=train,
             download=True,
             transform = transform
         )
     return cifar_dataset
 
-def generate_CIFAR_10_dataloader():
+def generate_CIFAR_10_dataloader(train = True):
     return DataLoader(
-        generate_CIFAR_10_dataset(),
+        generate_CIFAR_10_dataset(train = train),
         batch_size = 128,
         shuffle=True
     )

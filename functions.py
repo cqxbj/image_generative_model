@@ -86,7 +86,8 @@ def ddpm_save_samples(
         else : labels = torch.tensor([i for i in range(model.n_class) for _ in range(10)], dtype=torch.long)
     imgs_in_tensor = diffuser.denoised_sampling(model, imgs_shape=(100, 3, 32, 32), labels=labels)
     imgs_in_tensor = imgs_in_tensor.to("cpu")
-    grid_image = utils.make_grid(imgs_in_tensor, nrow=10, normalize=True, value_range=(-1,1))
+    imgs_in_tensor = (torch.clamp(imgs_in_tensor, -1, 1) + 1 ) / 2
+    grid_image = utils.make_grid(imgs_in_tensor, nrow=10)
     plt.imshow(grid_image.permute(1,2,0))
     plt.axis("off")
     plt.savefig(f"{save_folder}/{modelname}{epoch_index}", bbox_inches='tight', pad_inches=0.1)
