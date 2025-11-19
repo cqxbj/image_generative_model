@@ -16,7 +16,11 @@ import functions as my_F
 def __vae_loss_function(u, log_var, out, x, kl_weight = 0.3):
         batch_size = len(x)
         reconstrut_loss = F.mse_loss(out, x, reduction='sum') 
+
+        # KL loss: Control the distribution of latent space (to make the model generate more reasonable results)
         kl_loss = -torch.sum(1 + log_var - u.pow(2) - log_var.exp()) 
+        
+        #Total loss = Reconstruction loss + KL loss (KL loss has a weight of 0.3)
         loss = reconstrut_loss + kl_weight * kl_loss
         return loss / batch_size , reconstrut_loss.item() / batch_size, kl_weight * kl_loss.item() / batch_size
 
@@ -32,10 +36,10 @@ model = my_F.load_vae_model(model_name, z_dim=z_dim, n_class=n_class, device=dev
 
 
 #hyper parameter
-lr = 0.0002
+lr = 0.0002  # Learning rate (the speed of model learning)
 optimizer =  optim.AdamW(model.parameters(), lr=lr)
-dataloader = data_process.generate_Handwriting_dataloader()
-epoches = 250
+dataloader = data_process.generate_Handwriting_dataloader()  # Handwritten data loader
+epoches = 250  # Training epochs (the entire dataset will be trained 250 times)
 
 start_training = True
 if start_training:
