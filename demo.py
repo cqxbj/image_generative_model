@@ -81,22 +81,22 @@ Group:42  IMAGE GENERATIVE MODEL
 
 
 if __name__ == '__main__':
-    print("##### demo starts")
+    print("####### demo starts")
     print("\n")
 
     print("##### Part1 SAMPLING")
 
-    print("demo GAN")
+    print("# demo GAN")
     print("loading GANs model ......")
     model_name = "gans"
     gan_g, gan_d = my_F.load_gans_model(model_name,)
     print("generating GANs sample ......")
-    my_F.gans_save_samples(gan_g, input_str="eeeee aaaaa We all like COMP7015", save_folder="demo_save")
+    my_F.gans_save_samples(gan_g, input_str=title_gans+test_Str, save_folder="demo_save")
     print("GAN samples saved in folder demo_save")
 
     # demo vae
     print("\n\n")
-    print("demo VAE")
+    print("# demo VAE")
     model_name = "vae"
     print("loading VAE model ......")
     vae_model = my_F.load_vae_model(model_name)
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
     # demo ddpm
     print("\n\n")
-    print("demo DDPM")
+    print("# demo DDPM")
     print("loading DDPM model ......")
     model_name = "ddpm"
     model, diffuser = my_F.load_ddpm_model(model_name)
@@ -121,43 +121,26 @@ if __name__ == '__main__':
 
     print("##### Part2 FID")
     # calculate FID   
-    # my_F.save_hand_writing_images(train=True)
-    # my_F.save_hand_writing_images(train=False)
+    my_F.save_hand_writing_images(train=True)
+    my_F.save_hand_writing_images(train=False)
     
-    # print("### VAE fid")
-    # print("generating imgs for VAE fid")
-    # my_F.vae_generate_imgs(vae_model)
-    # print("calculating VAE fid")
-    # fid_vae = my_F.calcualte_fid("hw_train", "vae")
-    # val_fid_vae = my_F.calcualte_fid("hw_val", "vae")
-    # print("VAE fid_score: ", fid_vae)
-    # print("VAE val_fid_score: ", val_fid_vae)
+    print("# VAE fid")
+    print("generating imgs for VAE fid")
+    my_F.vae_generate_imgs(vae_model)
+    print("calculating VAE fid")
+    fid_vae = my_F.calcualte_fid("hw_train", "vae")
+    val_fid_vae = my_F.calcualte_fid("hw_val", "vae")
+    print("VAE fid_score: ", fid_vae)
+    print("VAE val_fid_score: ", val_fid_vae)
 
-    # print("\n")
+    print("\n")
 
-    # print("### GAN fid")
-    # print("generating imgs for GAN fid")
-    # my_F.gans_generate_imgs(gan_g)
-    # fid_gan = my_F.calcualte_fid("hw_train", "gans")
-    # val_fid_gan = my_F.calcualte_fid("hw_val", "gans")
-    # print("GAN fid_score: ", fid_gan)
-    # print("GAN val_fid_score: ", val_fid_gan)
-
-
-
-    # my_F.gans_generate_imgs(gan_g)
-
-    # fid_gan = my_F.calcualte_fid("hw_train", "gans")
-    # print("gan fid_score: ", fid_gan)
-    # print("calculating VAE FID")
+    print("# GAN fid")
+    print("generating imgs for GAN fid")
+    my_F.gans_generate_imgs(gan_g)
+    fid_gan = my_F.calcualte_fid("hw_train", "gans")
+    val_fid_gan = my_F.calcualte_fid("hw_val", "gans")
+    print("GAN fid_score: ", fid_gan)
+    print("GAN val_fid_score: ", val_fid_gan)
 
 
-    # print("##### demo ends")
-
-# demo gans
-
-
-# if __name__ == '__main__':
-#     fid_1  = my_F.calcualte_fid("hw_train", "gans")
-#     print(fid_1)
-# my_F.save_hand_writing_images("hw_train")

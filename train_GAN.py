@@ -29,7 +29,7 @@ parameters_load_path ="trained_parameters/"
 generator, discriminator = my_F.load_gans_model(model_name, z_dim=z_dim, n_class=n_class, device=device)
 
 
-data_loader = dg.generate_Handwriting_dataloader(less_space=True)
+data_loader = dg.generate_Handwriting_dataloader()
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -67,21 +67,21 @@ if start_training:
             real_images = real_images.to(device)
             labels = labels.to(device)
 
-            original_labels = labels
-            original_batch_size = batch_size
+            # original_labels = labels
+            # original_batch_size = batch_size
             
 
-            # make the number of image_space double. make D to be great on discriminating space/blank img.
-            blank_mask = (labels == 62)
+            # # make the number of image_space double. make D to be great on discriminating space/blank img.
+            # blank_mask = (labels == 62)
         
-            if blank_mask.sum() > 0:
-                blank_images = real_images[blank_mask]
-                blank_labels = labels[blank_mask]
+            # if blank_mask.sum() > 0:
+            #     blank_images = real_images[blank_mask]
+            #     blank_labels = labels[blank_mask]
 
-                real_images = torch.cat([real_images, blank_images], dim=0)
-                labels = torch.cat([labels, blank_labels], dim=0)
+            #     real_images = torch.cat([real_images, blank_images], dim=0)
+            #     labels = torch.cat([labels, blank_labels], dim=0)
 
-                batch_size = len(real_images)
+            #     batch_size = len(real_images)
 
             '''
             To understand this training process - > check GANs loss function:
@@ -122,11 +122,11 @@ if start_training:
                 generator.train()
                 generator_optimizer.zero_grad()
 
-                new_noises = torch.randn(original_batch_size, z_dim).to(device)
-                generative_images = generator(new_noises, original_labels)  
+                new_noises = torch.randn(batch_size, z_dim).to(device)
+                generative_images = generator(new_noises, labels)  
                 
-                discriminartor_predictions = discriminator(generative_images, original_labels)
-                false_positive = torch.ones(original_batch_size,1).to(device)
+                discriminartor_predictions = discriminator(generative_images, labels)
+                false_positive = torch.ones(batch_size,1).to(device)
                
                 g_loss = F.binary_cross_entropy(discriminartor_predictions, false_positive)
                 g_loss.backward()
