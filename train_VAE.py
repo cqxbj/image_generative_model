@@ -70,14 +70,17 @@ if start_training:
             sum_kl_loss += kl_loss
             count += 1
 
+        # End of each training round
         if epoch > 0: 
-            end_time = time.time()    
+            end_time = time.time()    # Record end time
             print(f"epoch {epoch} time: {end_time - start_time:.0f}")
 
+            # Calculate the average loss and record it
             loss_list.append(sum_loss/count)
             rct_loss_list.append(sum_rct_loss/count)
             kl_loss_list.append(sum_kl_loss/count)
-                
+
+            # Print loss
             print(f"\t loss:", (loss_list[-1]))
             print(f"\t rct_loss:", (rct_loss_list[-1]))
             print(f"\t kl_loss:", (kl_loss_list[-1]))  
