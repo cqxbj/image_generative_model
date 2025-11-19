@@ -16,7 +16,11 @@ import functions as my_F
 def __vae_loss_function(u, log_var, out, x, kl_weight = 0.3):
         batch_size = len(x)
         reconstrut_loss = F.mse_loss(out, x, reduction='sum') 
+
+        # KL loss: Control the distribution of latent space (to make the model generate more reasonable results)
         kl_loss = -torch.sum(1 + log_var - u.pow(2) - log_var.exp()) 
+        
+        #Total loss = Reconstruction loss + KL loss (KL loss has a weight of 0.3)
         loss = reconstrut_loss + kl_weight * kl_loss
         return loss / batch_size , reconstrut_loss.item() / batch_size, kl_weight * kl_loss.item() / batch_size
 
@@ -93,13 +97,15 @@ if start_training:
             sum_kl_loss += kl_loss
             count += 1
 
+        # End of each training round
         if epoch > 0: 
-            end_time = time.time()    
+            end_time = time.time()    # Record end time
             print(f"epoch {epoch} time: {end_time - start_time:.0f}")
             loss_list.append(sum_loss/count)
             rct_loss_list.append(sum_rct_loss/count)
             kl_loss_list.append(sum_kl_loss/count)
-                
+
+            # Print loss
             print(f"\t loss:", (loss_list[-1]))
             print(f"\t rct_loss:", (rct_loss_list[-1]))
             print(f"\t kl_loss:", (kl_loss_list[-1]))  
