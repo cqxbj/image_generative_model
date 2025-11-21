@@ -44,7 +44,7 @@ fre_generate_samples = 10
 fre_save_model = 100
 fre_eval_model = 5
 
-# trainning 
+# training 
 start_training = True
 
 if start_training:

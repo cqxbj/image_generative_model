@@ -41,7 +41,8 @@ with the course content, you may propose your own project.
 
 """
 
-
+# var for calculating the fid, cause it is time consuming we make it False here.
+calculate_fid = False
 
 if __name__ == '__main__':
     print("############## demo starts ##############")
@@ -84,56 +85,42 @@ if __name__ == '__main__':
 
 
 
+    if calculate_fid:
+        print("##### Part2 FID #####")
+        # calculate FID   
+        my_F.save_all_FID_test_imgs()
+        
+        # make sure you load the correct model before.   
+        print("# VAE fid")
+        print("generating imgs for VAE fid ......")
+        my_F.vae_generate_imgs(vae_model)
+        print("calculating VAE fid ......")
+        fid_vae = my_F.calcualte_fid("hw_train", "vae")
+        val_fid_vae = my_F.calcualte_fid("hw_val", "vae")
+        print("VAE fid_score: ", fid_vae)
+        print("VAE val_fid_score: ", val_fid_vae)
 
-    print("##### Part2 FID #####")
-    # calculate FID   
-    # images has already generated before, saved in the _FID_imgs: hw_train, hw_val, cifar_train, cifar_test. so we do not need to run those codes.
-    # my_F.save_all_FID_test_imgs()
-    
-    # make sure you load the correct model before.   
-    print("# VAE fid")
-    print("generating imgs for VAE fid ......")
-    my_F.vae_generate_imgs(vae_model)
-    print("calculating VAE fid ......")
-    fid_vae = my_F.calcualte_fid("hw_train", "vae")
-    val_fid_vae = my_F.calcualte_fid("hw_val", "vae")
-    print("VAE fid_score: ", fid_vae)
-    print("VAE val_fid_score: ", val_fid_vae)
+        print("\n")
 
-    print("\n")
+        print("# GAN fid")
+        print("generating imgs for GAN fid ......")
+        my_F.gans_generate_imgs(gan_g)
+        print("calculating GAN fid ......")
+        fid_gan = my_F.calcualte_fid("hw_train", "gans")
+        val_fid_gan = my_F.calcualte_fid("hw_val", "gans")
+        print("GAN fid_score: ", fid_gan)
+        print("GAN val_fid_score: ", val_fid_gan)
 
-    print("# GAN fid")
-    print("generating imgs for GAN fid ......")
-    my_F.gans_generate_imgs(gan_g)
-    print("calculating GAN fid ......")
-    fid_gan = my_F.calcualte_fid("hw_train", "gans")
-    val_fid_gan = my_F.calcualte_fid("hw_val", "gans")
-    print("GAN fid_score: ", fid_gan)
-    print("GAN val_fid_score: ", val_fid_gan)
+        print("\n")
 
-    print("\n")
-
-    print("# DDPM fid")
-    print("generating imgs for DDPM_500 fid ......")
-    # to save time, imgs of ddpm have been generated before, saved in the _FID_imgs: ddpm, so we do not need to run this
-    #my_F.ddpm_generate_imgs(ddpm_model, diffuser, n_100=50,save_folder="_FID_imgs/ddpm")
-    print("calculating DDPM_500 fid ......")
-    fid_ddpm = my_F.calcualte_fid("cifar_train", "ddpm")
-    val_fid_ddpm = my_F.calcualte_fid("cifar_test", "ddpm")
-    print("DDPM 500_epoch fid_score: ", fid_ddpm)
-    print("DDPM 500_epoch test_fid_score: ", val_fid_ddpm)
-
-    print("\n")
-    print("\n")
-    # we need compare the performance of ddpm at 500_epoch and 250_epoch, so load ddpm_250_epoch here, then calcualte its fid_score.
-    ddpm_model_250, diffuser = my_F.load_ddpm_model("ddpm250")
-    print("generating imgs for DDPM_250 fid ......")
-    # to save time, imgs of ddpm have been generated before, saved in the _FID_imgs: ddpm250, so we do not need to run this
-    #my_F.ddpm_generate_imgs(ddpm_model_250, diffuser, n_100=50, save_folder="_FID_imgs/ddpm250")
-    print("calculating DDPM_250 fid ......")
-    fid_ddpm = my_F.calcualte_fid("cifar_train", "ddpm250")
-    val_fid_ddpm = my_F.calcualte_fid("cifar_test", "ddpm250")
-    print("DDPM 250_epoch fid_score: ", fid_ddpm)
-    print("DDPM 250_epoch test_fid_score: ", val_fid_ddpm)
+        print("# DDPM fid")
+        print("generating imgs for DDPM_500 fid ......")
+        # to save time, imgs of ddpm have been generated before, saved in the _FID_imgs: ddpm, so we do not need to run this
+        #my_F.ddpm_generate_imgs(ddpm_model, diffuser, n_100=50,save_folder="_FID_imgs/ddpm")
+        print("calculating DDPM_500 fid ......")
+        fid_ddpm = my_F.calcualte_fid("cifar_train", "ddpm")
+        val_fid_ddpm = my_F.calcualte_fid("cifar_test", "ddpm")
+        print("DDPM 500_epoch fid_score: ", fid_ddpm)
+        print("DDPM 500_epoch test_fid_score: ", val_fid_ddpm)
 
 

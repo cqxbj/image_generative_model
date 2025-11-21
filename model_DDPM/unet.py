@@ -20,7 +20,7 @@ class SelfAttention(nn.Module):
         k = self.key(x).view(batch_size, -1, H * W)  
         v = self.value(x).view(batch_size, -1, H * W)  
         
-        attention = torch.bmm(q, k)  # [B, HW, HW]
+        attention = torch.bmm(q, k) 
         attention = attention / (q.size(-1) ** 0.5)
         attention = torch.softmax(attention, dim=-1)
         
@@ -35,7 +35,6 @@ class ConvBlock(nn.Module):
         super().__init__()
         self.residual_on = residual_on
 
-        #gn_groups = 8
         self.blocks = nn.Sequential(
             nn.Conv2d(in_channel, out_channel, kernel_size= 3, padding = 1),
             #nn.GroupNorm(gn_groups,out_channel),
@@ -86,15 +85,11 @@ class UNet(nn.Module):
             self.label_embeding = nn.Embedding(self.n_class,  self.time_dim)
 
         if self.attention:
-            # self.attention_down_1 = SelfAttention(64)
-            # self.attention_down_2 = SelfAttention(128)
             self.attention_down_3 = SelfAttention(256)
             self.attention_down_4 = SelfAttention(512)
             self.attention_bottom = SelfAttention(512)
             self.attention_up_4 = SelfAttention(512)
             self.attention_up_3 = SelfAttention(256)
-            # self.attention_up_2 = SelfAttention(128)
-            # self.attention_up_1 = SelfAttention(64)
 
         # max_pool for downsampling 
         self.max_pool = nn.MaxPool2d(2)
@@ -125,11 +120,9 @@ class UNet(nn.Module):
 
         # left side
         x1 = self.cov_down_1(x, v_time)
-        # if self.attention : x1 = self.attention_down_1(x1)
         x_max_down = self.max_pool(x1)
 
         x2 = self.con_down_2(x_max_down,v_time)
-        # if self.attention : x2 = self.attention_down_2(x2)
         x2_max_down = self.max_pool(x2)
 
         x3 = self.con_down_3(x2_max_down,v_time)
@@ -138,13 +131,11 @@ class UNet(nn.Module):
 
         x4 = self.con_down_4(x3_max_down,v_time)
         if self.attention : x4 = self.attention_down_4(x4) 
-        # x4_max_down = self.max_pool(x4)
         x4_max_down = x4
 
         # bottom
         x_bottom_left = self.bottom(x4_max_down,v_time)
         if self.attention : x_bottom_left = self.attention_bottom(x_bottom_left)
-        # x_bottom_right = self.upsample(x_bottom_left)
         x_bottom_right = x_bottom_left
 
         # right side 
@@ -160,12 +151,11 @@ class UNet(nn.Module):
         
         x_2_right = torch.cat([x_3_upsample, x2], dim = 1)
         x_2_right = self.cov_up_2(x_2_right,v_time)
-        # if self.attention : x_2_right = self.attention_up_2(x_2_right)
         x_2_upsample = self.upsample(x_2_right)
         
         x_1_right = torch.cat([x_2_upsample, x1], dim = 1)
         x_1_right = self.cov_up_1(x_1_right, v_time)
-        # if self.attention: x_1_right = self.attention_up_1(x_1_right)
+
 
         # out
         out = self.output(x_1_right)
