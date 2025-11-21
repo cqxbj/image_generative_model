@@ -109,7 +109,7 @@ if start_training:
             print(f"\t rct_loss:", (rct_loss_list[-1]))
             print(f"\t kl_loss:", (kl_loss_list[-1]))  
 
-            my_F.vae_save_samples(model, epoch= epoch)
+            my_F.vae_save_samples(model, epoch= epoch, model_name=model_name)
             my_F.plot_list(loss_list, 
                            rct_loss_list, 
                            kl_loss_list, 

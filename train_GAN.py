@@ -152,8 +152,8 @@ if start_training:
         
         ### generate some samples 
         if epoch % freq_gen_sample == 0:
-            my_F.gans_save_samples(generator, epoch=epoch, input_str="AAAA BBBB We all like COMP 7015")
-            my_F.plot_list(d_losses, g_losses, labels=["Discriminator losses", "Generator losses"], model_name="gans")
+            my_F.gans_save_samples(generator, epoch=epoch, input_str="AAAA BBBB We all like COMP 7015",model_name=model_name)
+            my_F.plot_list(d_losses, g_losses, labels=["Discriminator losses", "Generator losses"], model_name=model_name)
         
         if epoch % freq_save_model == 0 and epoch > 0:
             torch.save(generator.state_dict(),f"{parameters_load_path+model_name+str(epoch)}_G.pth")
