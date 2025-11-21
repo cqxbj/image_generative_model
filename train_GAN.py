@@ -16,13 +16,11 @@ import os
     It is very difficult to find balanced training parameters for Gernerators and Discriminators.
 '''
 
-
+model_name = "gans" 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ----------------------------------------------------------------------------------------------------------------------------------------------
 ### step - 1  load model and data
-
-model_name = "gans" 
 z_dim = 256
 n_class = 63
 parameters_load_path ="trained_parameters/" 

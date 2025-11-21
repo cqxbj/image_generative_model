@@ -12,6 +12,7 @@ import time
     this .py is implemented for training DDPM_based models.
 
 '''
+model_name = "ddpm"
 
 ## train DDPM for cifar_10
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -21,16 +22,13 @@ val_dataloader = data_process.generate_CIFAR_10_dataloader(train = False)
 
 # models parameters
 parameters_load_path ="trained_parameters/" 
-
-
-modelname = "ddpm"
 T = 1000
     # set n_label = 0 to make model unconditional.
 n_label = 10
 is_attention_on = True
 is_residual_on =True
 
-model, diffuser = my_F.load_ddpm_model(modelname, 
+model, diffuser = my_F.load_ddpm_model(model_name, 
                                        is_attention_on=is_attention_on, 
                                        is_residual_on=is_residual_on, 
                                        n_class=n_label, 
@@ -43,7 +41,7 @@ lr= 0.0001
 # other training parameters
 loss_plot_startindex = 1
 fre_generate_samples = 10
-fre_save_model = 50
+fre_save_model = 100
 fre_eval_model = 5
 
 # trainning 
@@ -120,12 +118,12 @@ if start_training:
                            eval_losses=eval_loss_list,
                            eval_interval=fre_eval_model, 
                            eval_start_index=fre_eval_model, 
-                           model_name=modelname, 
+                           model_name=model_name, 
                            start_index=loss_plot_startindex)
             if epoch % fre_generate_samples == 0 :
-                my_F.ddpm_save_samples(model, diffuser, modelname = modelname, epoch_index=epoch)
+                my_F.ddpm_save_samples(model, diffuser, modelname = model_name, epoch_index=epoch)
             if epoch % fre_save_model == 0 :
-                torch.save(model.state_dict(),parameters_load_path + modelname +str(epoch)+ ".pth")
+                torch.save(model.state_dict(),parameters_load_path + model_name +str(epoch)+ ".pth")
 
 
 
@@ -133,7 +131,7 @@ if start_training:
                    eval_losses=eval_loss_list,
                    eval_interval=fre_eval_model, 
                    eval_start_index=fre_eval_model, 
-                   model_name=modelname, 
+                   model_name=model_name, 
                    start_index=loss_plot_startindex)
-    torch.save(model.state_dict(),parameters_load_path + modelname + ".pth")
+    torch.save(model.state_dict(),parameters_load_path + model_name + ".pth")
 

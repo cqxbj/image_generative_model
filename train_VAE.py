@@ -11,7 +11,7 @@ import functions as my_F
     this .py is implemented for training VAE_based models.
 
 '''
-
+model_name = "vae"
 
 def __vae_loss_function(u, log_var, out, x, kl_weight = 0.3):
         batch_size = len(x)
@@ -29,7 +29,6 @@ parameters_load_path ="trained_parameters/"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 #model parameter
-model_name = "vae"
 z_dim = 256
 n_class = 63
 model = my_F.load_vae_model(model_name, z_dim=z_dim, n_class=n_class, device=device)
@@ -42,7 +41,7 @@ dataloader = data_process.generate_Handwriting_dataloader()
 val_dataloader = data_process.generate_Handwriting_dataloader(False)
 epoches = 500
 eval_freq = 10
-model_save_freq = 50
+model_save_freq = 250
 
 start_training = True
 if start_training:

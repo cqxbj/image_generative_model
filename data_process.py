@@ -101,6 +101,7 @@ def generate_Handwriting_dataloader(train = True, less_space = False):
                       batch_size= 128, 
                       shuffle= True)
 
+
 class HandWritingDataset(Dataset):
     def __init__(self,  train = True, less_space = False, path = "data/handwriting_data/" ):
         super().__init__()

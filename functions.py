@@ -5,7 +5,6 @@ import numpy as np
 import torchvision.transforms as transforms
 import torchvision
 import data_process
-import random
 from torchvision.utils import save_image
 import torchvision.utils as utils
 from model_DDPM.unet import UNet
@@ -15,8 +14,6 @@ from model_VAE.vae import VAE
 from data_process import HandWritingDataset
 from model_GANs.gans import Discriminator, Generator  
 from data_process import Tokenizer
-
-import shutil
 import os
 
 
@@ -70,8 +67,9 @@ def ddpm_generate_imgs(
         labels = torch.tensor([i for i in range(model.n_class) for _ in range(10)], dtype=torch.long)
     for _ in range(n_100):
         imgs = diffuser.denoised_sampling(model, imgs_shape=(100,3,32,32), labels=labels)
+        imgs = (torch.clamp(imgs, -1, 1) + 1 ) / 2
         for img in imgs:
-            save_image(img,fp = f"{save_folder}/gen{i}.png",normalize=True, value_range=(-1, 1))
+            save_image(img,fp = f"{save_folder}/gen{i}.png",normalize=False)
             i += 1
 
 #normally use this function for visualization and demonstration              
@@ -383,31 +381,34 @@ def save_hand_writing_images(train = True):
     save_path = "_FID_imgs/" + save_folder
     if not os.path.exists(save_path):
         os.makedirs(save_path)    
-    dataset = HandWritingDataset(train=train)
-    for i in range(len(dataset)):
-        image, _ = dataset[i]
-        image_pil = transforms.ToPILImage()(image)
-        image_pil.save(os.path.join(save_path, f'{i:05d}.png'))
+        dataset = HandWritingDataset(train=train)
+        for i in range(len(dataset)):
+            image, _ = dataset[i]
+            save_image(image,os.path.join(save_path, f'{i:05d}.png'))
 
-def save_cifar10_images(save_folder = "cifar_train", num_images=60000, train_data = True):
-        save_path = "_FID_imgs/" + save_folder
+def save_cifar10_images(num_images=60000, train_data = True):
+        if train_data: save_path = "_FID_imgs/" + "cifar_train"
+        else: save_path = "_FID_imgs/" + "cifar_test"
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
-        dataset = torchvision.datasets.CIFAR10(
-            root='./data', 
-            train=train_data, 
-            download=True, 
-            transform=transform
-        )
-        print(len(dataset))
-        for i in range(min(num_images, len(dataset))):
-            image, _ = dataset[i]
-            image_pil = transforms.ToPILImage()(image)
-            image_pil.save(os.path.join(save_path, f'{i:05d}.png'))
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+            ])
+            dataset = torchvision.datasets.CIFAR10(
+                root='./data', 
+                train=train_data, 
+                download=True, 
+                transform=transform
+            )
+            for i in range(min(num_images, len(dataset))):
+                image, _ = dataset[i]
+                save_image(image,os.path.join(save_path, f'{i:05d}.png'))
 
 
-
-
+def save_all_FID_test_imgs():
+    print("generate FID test imgs")
+    save_hand_writing_images(train=True)
+    save_hand_writing_images(train=False)
+    save_cifar10_images(train_data=True)
+    save_cifar10_images(train_data=False)
+    print("generate FID test imgs done")
