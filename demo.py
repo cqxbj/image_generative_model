@@ -27,13 +27,6 @@ test_Str = """
 ABCDEFGHIJKLMNOPQRSTUVwXYZ
 abcdefghijklmnopqrstuvwxyz
 
-COMP7015 Group:42  IMAGE GENERATIVE MODEL 
-1: Zihao ZHAO    25418823
-2: Bojie XIANG   25400444
-3: Zinao SU      25434675
-4: Tianchi ZHOU  25409638
-5: Tianxiao ZHU  25407732
-
 
 Topic 3: Open Topic
 If you are interested in another AI problem that aligns 
