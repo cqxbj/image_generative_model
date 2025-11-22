@@ -11,10 +11,3 @@
 <img width="389" height="389" alt="modelname-999" src="https://github.com/user-attachments/assets/04407c2a-47dc-4992-ba21-78153a8da524" />
 
 
-# GANs 
-<img width="15700" height="10296" alt="gans-sample" src="https://github.com/user-attachments/assets/2e33eb31-471a-4e88-b82e-75c716438a43" />
-
-# VAE 
-<img width="15700" height="10296" alt="vae-sample" src="https://github.com/user-attachments/assets/f1148f7f-4fc8-415e-acd8-19f4c678749c" />
-
-
